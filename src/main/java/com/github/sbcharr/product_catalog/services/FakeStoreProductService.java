@@ -15,27 +15,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Service
+@Service("fakeStoreProductService")
 public class FakeStoreProductService implements IProductService {
     private static final String FAKE_STORE_PRODUCT_BY_ID_URL = "https://fakestoreapi.com/products/{productId}";
     private static final String FAKE_STORE_PRODUCTS_URL = "https://fakestoreapi.com/products";
 
     @Autowired
     private RestTemplateBuilder restTemplateBuilder;
-
-    @Override
-    public @Nullable Product getProductById(Long productId) {
-        RestTemplate restTemplate = restTemplateBuilder.build();
-        ResponseEntity<FakeStoreProductDto> fakeStoreProductDtoResponseEntity =
-                restTemplate.getForEntity(FAKE_STORE_PRODUCT_BY_ID_URL, FakeStoreProductDto.class, productId);
-
-        FakeStoreProductDto fakeStoreProductDto = fakeStoreProductDtoResponseEntity.getBody();
-        if (fakeStoreProductDtoResponseEntity.getStatusCode() != HttpStatus.OK || fakeStoreProductDto == null) {
-            return null;
-        }
-
-        return FakeStoreProductMapper.INSTANCE.toEntity(fakeStoreProductDto);
-    }
 
     @Override
     public List<Product> getAllProducts() {
@@ -51,6 +37,20 @@ public class FakeStoreProductService implements IProductService {
         return Arrays.stream(fakeStoreProductDtos)
                 .map(FakeStoreProductMapper.INSTANCE::toEntity)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public @Nullable Product getProductById(Long productId) {
+        RestTemplate restTemplate = restTemplateBuilder.build();
+        ResponseEntity<FakeStoreProductDto> fakeStoreProductDtoResponseEntity =
+                restTemplate.getForEntity(FAKE_STORE_PRODUCT_BY_ID_URL, FakeStoreProductDto.class, productId);
+
+        FakeStoreProductDto fakeStoreProductDto = fakeStoreProductDtoResponseEntity.getBody();
+        if (fakeStoreProductDtoResponseEntity.getStatusCode() != HttpStatus.OK || fakeStoreProductDto == null) {
+            return null;
+        }
+
+        return FakeStoreProductMapper.INSTANCE.toEntity(fakeStoreProductDto);
     }
 
     @Override

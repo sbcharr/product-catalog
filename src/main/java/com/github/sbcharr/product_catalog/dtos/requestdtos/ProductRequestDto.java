@@ -11,6 +11,5 @@ public class ProductRequestDto {
     private String name;
     private String description;
     private double price;
-    private List<String> imageurl;
-    private CategoryRequestDto category;
+    private String imageurl;
 }

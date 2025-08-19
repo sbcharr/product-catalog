@@ -2,46 +2,47 @@ package com.github.sbcharr.product_catalog.controllers;
 
 import com.github.sbcharr.product_catalog.dtos.requestdtos.ProductRequestDto;
 import com.github.sbcharr.product_catalog.dtos.responsedtos.ProductResponseDto;
+import com.github.sbcharr.product_catalog.mappers.ProductMapper;
+import com.github.sbcharr.product_catalog.models.Product;
+import com.github.sbcharr.product_catalog.services.FakeStoreProductService;
 import com.github.sbcharr.product_catalog.services.IProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 public class ProductController {
     @Autowired
+    @Qualifier("fakeStoreProductService")
     IProductService productService;
 
     @PostMapping("/products")
     public ProductResponseDto createProduct(@RequestBody ProductRequestDto productRequestDTO) {
-
+        Product product = productService.createProduct(ProductMapper.INSTANCE.toEntity(productRequestDTO));
+        return ProductMapper.INSTANCE.toDto(product);
     }
 
     @GetMapping("/products")
-    public List<ProductRequestDto> getAllProducts() {
-//        Product product1 = new Product();
-//        product1.setId(1L);
-//        product1.setPrice(1000D);
-//
-//        Product product2 = new Product();
-//        product2.setId(2L);
-//        product2.setPrice(2000D);
-//
-//        List<Product> productList = new ArrayList<>();
-//        productList.add(product1);
-//        productList.add(product2);
-//
-//        return productList;
-        return null;
+    public List<ProductResponseDto> getAllProducts() {
+        List<Product> productList = productService.getAllProducts();
+
+        return productList.stream()
+                .map(ProductMapper.INSTANCE::toDto)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/products/{id}")
     public ProductResponseDto getProductById(@PathVariable("id") Long productId) {
-        ProductRequestDto product = new ProductRequestDto();
-        product.setId(2L);
-        product.setPrice(2000D);
+        Product product = productService.getProductById(productId);
+        if (product == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
 
-        return product;
+        return ProductMapper.INSTANCE.toDto(product);
     }
 }

@@ -2,6 +2,7 @@ package com.github.sbcharr.product_catalog.dtos.responsedtos;
 
 import com.github.sbcharr.product_catalog.dtos.BaseDto;
 import com.github.sbcharr.product_catalog.dtos.requestdtos.CategoryRequestDto;
+import com.github.sbcharr.product_catalog.models.Category;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,6 +14,6 @@ public class ProductResponseDto extends BaseDto {
     private String name;
     private String description;
     private double price;
-    private List<String> imageurl;
-    private CategoryRequestDto category;
+    private String imageurl;
+    private Category category;
 }
