@@ -1,0 +1,14 @@
+package com.github.sbcharr.product_catalog.models;
+
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.List;
+
+@Setter
+@Getter
+public class Category extends BaseEntity {
+    private String name;
+    private String description;
+    private List<Product> products;
+}
