@@ -21,12 +21,6 @@ public class ProductController {
     @Qualifier("fakeStoreProductService")
     IProductService productService;
 
-    @PostMapping("/products")
-    public ProductResponseDto createProduct(@RequestBody ProductRequestDto productRequestDTO) {
-        Product product = productService.createProduct(ProductMapper.INSTANCE.toEntity(productRequestDTO));
-        return ProductMapper.INSTANCE.toDto(product);
-    }
-
     @GetMapping("/products")
     public List<ProductResponseDto> getAllProducts() {
         List<Product> productList = productService.getAllProducts();
@@ -44,5 +38,17 @@ public class ProductController {
         }
 
         return ProductMapper.INSTANCE.toDto(product);
+    }
+
+    @PostMapping("/products")
+    public ProductResponseDto createProduct(@RequestBody ProductRequestDto requestDto) {
+        Product productIn = ProductMapper.INSTANCE.toEntity(requestDto);
+        Product productOut = productService.createProduct(productIn);
+
+        if (productOut == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
+
+        return ProductMapper.INSTANCE.toDto(productOut);
     }
 }
