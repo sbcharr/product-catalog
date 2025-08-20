@@ -1,7 +1,7 @@
 package com.github.sbcharr.product_catalog.mappers;
 
-import com.github.sbcharr.product_catalog.dtos.requestdtos.CategoryRequestDto;
-import com.github.sbcharr.product_catalog.dtos.responsedtos.CategoryResponseDto;
+import com.github.sbcharr.product_catalog.dtos.request.CategoryRequestDto;
+import com.github.sbcharr.product_catalog.dtos.response.CategoryResponseDto;
 import com.github.sbcharr.product_catalog.models.Category;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;

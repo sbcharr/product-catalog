@@ -1,6 +1,5 @@
-package com.github.sbcharr.product_catalog.dtos.requestdtos;
+package com.github.sbcharr.product_catalog.dtos.request;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 

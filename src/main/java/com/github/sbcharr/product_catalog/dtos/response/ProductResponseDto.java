@@ -1,12 +1,9 @@
-package com.github.sbcharr.product_catalog.dtos.responsedtos;
+package com.github.sbcharr.product_catalog.dtos.response;
 
 import com.github.sbcharr.product_catalog.dtos.BaseDto;
-import com.github.sbcharr.product_catalog.dtos.requestdtos.CategoryRequestDto;
 import com.github.sbcharr.product_catalog.models.Category;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.List;
 
 @Setter
 @Getter

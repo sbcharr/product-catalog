@@ -1,4 +1,4 @@
-package com.github.sbcharr.product_catalog.dtos.requestdtos;
+package com.github.sbcharr.product_catalog.dtos.request;
 
 import lombok.Getter;
 import lombok.Setter;

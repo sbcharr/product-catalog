@@ -1,4 +1,4 @@
-package com.github.sbcharr.product_catalog.dtos.responsedtos;
+package com.github.sbcharr.product_catalog.dtos.response;
 
 import com.github.sbcharr.product_catalog.dtos.BaseDto;
 import lombok.Getter;

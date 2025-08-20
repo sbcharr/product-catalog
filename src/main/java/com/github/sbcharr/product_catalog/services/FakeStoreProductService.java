@@ -1,6 +1,6 @@
 package com.github.sbcharr.product_catalog.services;
 
-import com.github.sbcharr.product_catalog.dtos.requestdtos.FakeStoreProductDto;
+import com.github.sbcharr.product_catalog.dtos.request.FakeStoreProductDto;
 import com.github.sbcharr.product_catalog.mappers.FakeStoreProductMapper;
 import com.github.sbcharr.product_catalog.models.Product;
 import jakarta.annotation.Nullable;
@@ -15,6 +15,7 @@ import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,7 +24,7 @@ import java.util.stream.Collectors;
 public class FakeStoreProductService implements IProductService {
     private static final String FAKE_STORE_PRODUCT_BY_ID_URL = "https://fakestoreapi.com/products/{productId}";
     private static final String FAKE_STORE_PRODUCT_URL = "https://fakestoreapi.com/products";
-
+    new ArrayList
     @Autowired
     private RestTemplateBuilder restTemplateBuilder;
 

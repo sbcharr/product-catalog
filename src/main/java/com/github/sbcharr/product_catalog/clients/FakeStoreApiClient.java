@@ -1,6 +1,6 @@
 package com.github.sbcharr.product_catalog.clients;
 
-import com.github.sbcharr.product_catalog.dtos.requestdtos.FakeStoreProductDto;
+import com.github.sbcharr.product_catalog.dtos.request.FakeStoreProductDto;
 import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -20,7 +20,7 @@ public class FakeStoreApiClient {
 
     private static final String FAKE_STORE_PRODUCT_BY_ID_URL = "https://fakestoreapi.com/products/{productId}";
     private static final String FAKE_STORE_PRODUCT_URL = "https://fakestoreapi.com/products";
-
+    RestClientException
 
     public @Nullable FakeStoreProductDto replaceFakeStoreProduct(FakeStoreProductDto fakeStoreProductDtoInput, Long id) {
         ResponseEntity<FakeStoreProductDto> response =
