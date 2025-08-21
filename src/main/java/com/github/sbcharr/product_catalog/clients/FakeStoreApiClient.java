@@ -3,6 +3,7 @@ package com.github.sbcharr.product_catalog.clients;
 import com.github.sbcharr.product_catalog.configs.FakeStoreApiConfig;
 import com.github.sbcharr.product_catalog.dtos.request.FakeStoreProductDto;
 import com.github.sbcharr.product_catalog.exceptions.FakeStoreApiException;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
@@ -15,9 +16,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 @Component
+@Slf4j
 public class FakeStoreApiClient {
-    private static final Logger log = LoggerFactory.getLogger(FakeStoreApiClient.class);
-
     private static final String PRODUCT_BY_ID_PATH = "/products/{id}";
     private static final String PRODUCTS_PATH = "/products";
 

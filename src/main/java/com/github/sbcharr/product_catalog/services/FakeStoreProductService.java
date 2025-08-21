@@ -1,79 +1,110 @@
 package com.github.sbcharr.product_catalog.services;
 
+import com.github.sbcharr.product_catalog.clients.FakeStoreApiClient;
 import com.github.sbcharr.product_catalog.dtos.request.FakeStoreProductDto;
-import com.github.sbcharr.product_catalog.mappers.FakeStoreProductMapper;
+import com.github.sbcharr.product_catalog.dtos.request.ProductRequestDto;
+import com.github.sbcharr.product_catalog.models.Category;
 import com.github.sbcharr.product_catalog.models.Product;
-import jakarta.annotation.Nullable;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RequestCallback;
-import org.springframework.web.client.ResponseExtractor;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service("fakeStoreProductService")
+@RequiredArgsConstructor
+@Slf4j
 public class FakeStoreProductService implements IProductService {
-    private static final String FAKE_STORE_PRODUCT_BY_ID_URL = "https://fakestoreapi.com/products/{productId}";
-    private static final String FAKE_STORE_PRODUCT_URL = "https://fakestoreapi.com/products";
-    @Autowired
-    private RestTemplateBuilder restTemplateBuilder;
+    private final FakeStoreApiClient apiClient;
+
+    @Override
+    public Product createProduct(Product product) {
+        log.info("Creating product: {}", product.getName());
+        FakeStoreProductDto inDto = toFakeStoreDto(product);
+        FakeStoreProductDto outDto = apiClient.createFakeStoreProduct(inDto);
+
+        return toEntityFromFakeStoreDto(outDto);
+    }
+
+    @Override
+    public Product updateProduct(Product product, Long productId) {
+        log.info("Updating product id={}", productId);
+        FakeStoreProductDto inDto = toFakeStoreDto(product);
+        FakeStoreProductDto outDto = apiClient.replaceFakeStoreProduct(inDto, productId);
+
+        return toEntityFromFakeStoreDto(outDto);
+    }
 
     @Override
     public List<Product> getAllProducts() {
-        RestTemplate restTemplate = restTemplateBuilder.build();
-        ResponseEntity<FakeStoreProductDto[]> response =
-                restTemplate.getForEntity(FAKE_STORE_PRODUCT_URL, FakeStoreProductDto[].class);
-
-        FakeStoreProductDto[] fakeStoreProductDtos = response.getBody();
-        if (response.getStatusCode() != HttpStatus.OK || fakeStoreProductDtos == null || fakeStoreProductDtos.length == 0) {
-            return List.of();
-        }
+        log.info("Fetching all products");
+        FakeStoreProductDto[] fakeStoreProductDtos = apiClient.getAllProducts();
 
         return Arrays.stream(fakeStoreProductDtos)
-                .map(FakeStoreProductMapper.INSTANCE::toEntity)
+                .map(this::toEntityFromFakeStoreDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public @Nullable Product getProductById(Long productId) {
-        RestTemplate restTemplate = restTemplateBuilder.build();
-        ResponseEntity<FakeStoreProductDto> fakeStoreProductDtoResponseEntity =
-                restTemplate.getForEntity(FAKE_STORE_PRODUCT_BY_ID_URL, FakeStoreProductDto.class, productId);
-
-        FakeStoreProductDto fakeStoreProductDto = fakeStoreProductDtoResponseEntity.getBody();
-        if (fakeStoreProductDtoResponseEntity.getStatusCode() != HttpStatus.OK || fakeStoreProductDto == null) {
-            return null;
-        }
-
-        return FakeStoreProductMapper.INSTANCE.toEntity(fakeStoreProductDto);
+    public Product getProductById(Long productId) {
+        FakeStoreProductDto fakeStoreProductDto = apiClient.getProductById(productId);
+        return toEntityFromFakeStoreDto(fakeStoreProductDto);
     }
 
     @Override
-    public @Nullable Product createProduct(Product product) {
-        RestTemplate restTemplate = restTemplateBuilder.build();
-        ResponseEntity<FakeStoreProductDto> response = restTemplate.postForEntity(FAKE_STORE_PRODUCT_URL,
-                FakeStoreProductMapper.INSTANCE.toDto(product), FakeStoreProductDto.class);
-
-        FakeStoreProductDto fakeStoreOutDto = response.getBody();
-        if (response.getStatusCode() != HttpStatus.CREATED || fakeStoreOutDto == null) {
-            return null;
-        }
-
-        return FakeStoreProductMapper.INSTANCE.toEntity(fakeStoreOutDto);
+    public void deleteProductById(Long productId) {
+        apiClient.deleteProductById(productId);
     }
 
-    public <T> ResponseEntity<T> requestForEntity(String url, @org.springframework.lang.Nullable Object request, Class<T> responseType, Object... uriVariables) throws RestClientException {
-        RequestCallback requestCallback = this.httpEntityCallback(request, responseType);
-        ResponseExtractor<ResponseEntity<T>> responseExtractor = this.responseEntityExtractor(responseType);
-        return (ResponseEntity)nonNull((ResponseEntity)this.execute(url, HttpMethod.POST, requestCallback, responseExtractor, uriVariables));
+    public Product toEntityFromFakeStoreDto(FakeStoreProductDto dto) {
+        Product product = new Product();
+        product.setId(dto.getId());
+        product.setName(dto.getTitle());
+        product.setDescription(dto.getDescription());
+        product.setPrice(dto.getPrice());
+        product.setImageUrl(dto.getImage());
+        if (dto.getCategory() != null) {
+            Category category = new Category();
+            category.setName(dto.getCategory());
+            product.setCategory(category);
+        }
+
+        return product;
+    }
+
+    public FakeStoreProductDto toFakeStoreDto(Product entity) {
+        FakeStoreProductDto dto = new FakeStoreProductDto();
+        dto.setTitle(entity.getName());
+        dto.setDescription(entity.getDescription());
+        dto.setPrice(entity.getPrice());
+        dto.setImage(entity.getImageUrl());
+        dto.setCategory(entity.getCategory().getName());
+
+        return dto;
+    }
+
+    public Product toEntity(ProductRequestDto dto) {
+        Product product = new Product();
+        product.setName(dto.getName());
+        product.setDescription(dto.getDescription());
+        product.setPrice(dto.getPrice());
+        product.setImageUrl(dto.getImageurl());
+        product.setCategory(dto.getCategory());
+
+        return product;
+    }
+
+    public ProductRequestDto toDto(Product entity) {
+        ProductRequestDto dto = new ProductRequestDto();
+        dto.setId(entity.getId());
+        dto.setName(entity.getName());
+        dto.setDescription(entity.getDescription());
+        dto.setPrice(entity.getPrice());
+        dto.setImageurl(entity.getImageUrl());
+        dto.setCategory(entity.getCategory());
+
+        return dto;
     }
 }
