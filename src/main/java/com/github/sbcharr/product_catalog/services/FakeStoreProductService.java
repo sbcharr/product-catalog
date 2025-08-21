@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 public class FakeStoreProductService implements IProductService {
     private static final String FAKE_STORE_PRODUCT_BY_ID_URL = "https://fakestoreapi.com/products/{productId}";
     private static final String FAKE_STORE_PRODUCT_URL = "https://fakestoreapi.com/products";
-    new ArrayList
     @Autowired
     private RestTemplateBuilder restTemplateBuilder;
 

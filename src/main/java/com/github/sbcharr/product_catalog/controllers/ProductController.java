@@ -51,5 +51,4 @@ public class ProductController {
 
         return ProductMapper.INSTANCE.toDto(productOut);
     }
-    IOException
 }
