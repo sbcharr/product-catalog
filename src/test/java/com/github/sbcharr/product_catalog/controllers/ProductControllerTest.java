@@ -92,6 +92,15 @@ public class ProductControllerTest {
     }
 
     @Test
+    void updateProduct_NullId_throws400() {
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+                () -> productController.updateProduct(sampleProductRequestDto, null));
+
+        assertEquals(400, ex.getStatusCode().value());
+        verify(productService, never()).updateProduct(any(), any());
+    }
+
+    @Test
     void updateProduct_invalidId_throws400() {
         ResponseStatusException ex = assertThrows(ResponseStatusException.class,
                 () -> productController.updateProduct(sampleProductRequestDto, 0L));
