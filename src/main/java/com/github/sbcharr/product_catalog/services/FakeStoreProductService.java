@@ -3,6 +3,7 @@ package com.github.sbcharr.product_catalog.services;
 import com.github.sbcharr.product_catalog.clients.FakeStoreApiClient;
 import com.github.sbcharr.product_catalog.dtos.request.FakeStoreProductDto;
 import com.github.sbcharr.product_catalog.dtos.request.ProductRequestDto;
+import com.github.sbcharr.product_catalog.dtos.response.ProductResponseDto;
 import com.github.sbcharr.product_catalog.models.Category;
 import com.github.sbcharr.product_catalog.models.Product;
 import lombok.RequiredArgsConstructor;
@@ -81,29 +82,6 @@ public class FakeStoreProductService implements IProductService {
         dto.setPrice(entity.getPrice());
         dto.setImage(entity.getImageUrl());
         dto.setCategory(entity.getCategory().getName());
-
-        return dto;
-    }
-
-    public Product toEntity(ProductRequestDto dto) {
-        Product product = new Product();
-        product.setName(dto.getName());
-        product.setDescription(dto.getDescription());
-        product.setPrice(dto.getPrice());
-        product.setImageUrl(dto.getImageurl());
-        product.setCategory(dto.getCategory());
-
-        return product;
-    }
-
-    public ProductRequestDto toDto(Product entity) {
-        ProductRequestDto dto = new ProductRequestDto();
-        dto.setId(entity.getId());
-        dto.setName(entity.getName());
-        dto.setDescription(entity.getDescription());
-        dto.setPrice(entity.getPrice());
-        dto.setImageurl(entity.getImageUrl());
-        dto.setCategory(entity.getCategory());
 
         return dto;
     }
