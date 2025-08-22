@@ -6,6 +6,7 @@ import com.github.sbcharr.product_catalog.models.Product;
 import com.github.sbcharr.product_catalog.services.IProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -19,27 +20,30 @@ public class ProductController {
     IProductService productService;
 
     @PostMapping("/products")
-    public ProductResponseDto createProduct(@RequestBody ProductRequestDto requestDto) {
+    public ResponseEntity<ProductResponseDto> createProduct(@RequestBody ProductRequestDto requestDto) {
         Product product = ProductController.toEntity(requestDto);
         product = productService.createProduct(product);
         if (product == null) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to create product");
         }
+        ProductResponseDto productResponseDto = ProductController.toDto(product);
 
-        return ProductController.toDto(product);
+        return ResponseEntity.status(HttpStatus.CREATED).body(productResponseDto);
     }
 
     @PutMapping("/products/{id}")
-    public ProductResponseDto updateProduct(@RequestBody ProductRequestDto requestDto, @PathVariable("id") Long productId) {
+    public ResponseEntity<ProductResponseDto> updateProduct(@RequestBody ProductRequestDto requestDto, @PathVariable("id") Long productId) {
         if (productId == null || productId <= 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid Product ID");
         }
         Product product = ProductController.toEntity(requestDto);
         product = productService.updateProduct(product, productId);
         if (product == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid Data or Product Not Found");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid Data or Product Not Found");
         }
-        return ProductController.toDto(product);
+        ProductResponseDto productResponseDto = ProductController.toDto(product);
+
+        return ResponseEntity.ok(productResponseDto);
     }
 
     @GetMapping("/products")
@@ -62,10 +66,10 @@ public class ProductController {
     }
 
     @DeleteMapping("/products/{id}")
-    public ProductResponseDto deleteProductById(@PathVariable("id") Long id) {
+    public ResponseEntity<Void> deleteProductById(@PathVariable("id") Long id) {
         productService.deleteProductById(id);
 
-        return new ProductResponseDto(); // Return an empty DTO or handle as needed
+        return ResponseEntity.noContent().build();
     }
 
     public static Product toEntity(ProductRequestDto dto) {

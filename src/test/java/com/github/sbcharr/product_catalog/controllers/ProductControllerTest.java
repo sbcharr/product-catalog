@@ -11,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Arrays;
@@ -59,13 +60,15 @@ public class ProductControllerTest {
     @Test
     public void testCreateProduct_success() {
         when(productService.createProduct(any(Product.class))).thenReturn(sampleProduct);
-        ProductResponseDto responseDto = productController.createProduct(sampleProductRequestDto);
-        assertNotNull(responseDto);
-        assertEquals(sampleProduct.getId(), responseDto.getId());
-        assertEquals(sampleProduct.getName(), responseDto.getName());
-        assertEquals(sampleProduct.getDescription(), responseDto.getDescription());
-        assertEquals(sampleProduct.getPrice(), responseDto.getPrice());
-        assertEquals(sampleProduct.getImageUrl(), responseDto.getImageurl());
+        ResponseEntity<ProductResponseDto> response = productController.createProduct(sampleProductRequestDto);
+        assertNotNull(response.getBody());
+
+        ProductResponseDto responseBody = response.getBody();
+        assertEquals(sampleProduct.getId(), responseBody.getId());
+        assertEquals(sampleProduct.getName(), responseBody.getName());
+        assertEquals(sampleProduct.getDescription(), responseBody.getDescription());
+        assertEquals(sampleProduct.getPrice(), responseBody.getPrice());
+        assertEquals(sampleProduct.getImageUrl(), responseBody.getImageurl());
         //assertEquals(sampleProduct.getCategory(), responseDto.getCategory());
         verify(productService, times(1)).createProduct(any(Product.class));
     }
@@ -84,10 +87,13 @@ public class ProductControllerTest {
     void updateProduct_success() {
         when(productService.updateProduct(any(Product.class), eq(1L))).thenReturn(sampleProduct);
 
-        ProductResponseDto response = productController.updateProduct(sampleProductRequestDto, 1L);
+        ResponseEntity<ProductResponseDto> response = productController.updateProduct(sampleProductRequestDto,
+                1L);
 
         assertNotNull(response);
-        assertEquals("iPhone", response.getName());
+
+        ProductResponseDto responseBody = response.getBody();
+        assertEquals("iPhone", responseBody.getName());
         verify(productService).updateProduct(any(Product.class), eq(1L));
     }
 
@@ -110,13 +116,13 @@ public class ProductControllerTest {
     }
 
     @Test
-    void updateProduct_failure_returns400() {
+    void updateProduct_failure_returns404() {
         when(productService.updateProduct(any(Product.class), eq(1L))).thenReturn(null);
 
         ResponseStatusException ex = assertThrows(ResponseStatusException.class,
                 () -> productController.updateProduct(sampleProductRequestDto, 1L));
 
-        assertEquals(400, ex.getStatusCode().value());
+        assertEquals(404, ex.getStatusCode().value());
     }
 
     @Test
@@ -164,9 +170,9 @@ public class ProductControllerTest {
     void deleteProductById_success() {
         doNothing().when(productService).deleteProductById(1L);
 
-        ProductResponseDto response = productController.deleteProductById(1L);
+        ResponseEntity<Void> response = productController.deleteProductById(1L);
 
-        assertNotNull(response);
+        assertNull(response.getBody());
         verify(productService).deleteProductById(1L);
     }
 }
