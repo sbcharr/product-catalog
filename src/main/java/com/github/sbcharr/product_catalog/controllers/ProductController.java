@@ -30,9 +30,12 @@ public class ProductController {
     }
 
     @PutMapping("/products/{id}")
-    public ProductResponseDto updateProduct(@RequestBody ProductRequestDto requestDto, @PathVariable("id") Long id) {
+    public ProductResponseDto updateProduct(@RequestBody ProductRequestDto requestDto, @PathVariable("id") Long productId) {
+        if (productId == null || productId <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid Product ID");
+        }
         Product product = ProductController.toEntity(requestDto);
-        product = productService.updateProduct(product, id);
+        product = productService.updateProduct(product, productId);
         if (product == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid Data or Product Not Found");
         }
