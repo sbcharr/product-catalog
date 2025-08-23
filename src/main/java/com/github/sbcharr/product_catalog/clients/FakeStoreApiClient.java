@@ -1,52 +1,121 @@
 package com.github.sbcharr.product_catalog.clients;
 
+import com.github.sbcharr.product_catalog.configs.FakeStoreApiConfig;
 import com.github.sbcharr.product_catalog.dtos.request.FakeStoreProductDto;
-import jakarta.annotation.Nullable;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
+import com.github.sbcharr.product_catalog.exceptions.FakeStoreApiException;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.core5.util.TimeValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RequestCallback;
-import org.springframework.web.client.ResponseExtractor;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 
 @Component
+@Slf4j
 public class FakeStoreApiClient {
-    @Autowired
-    private RestTemplateBuilder restTemplateBuilder;
+    private static final String PRODUCT_BY_ID_PATH = "/products/{id}";
+    private static final String PRODUCTS_PATH = "/products";
 
-    private static final String FAKE_STORE_PRODUCT_BY_ID_URL = "https://fakestoreapi.com/products/{productId}";
-    private static final String FAKE_STORE_PRODUCT_URL = "https://fakestoreapi.com/products";
-    RestClientException
+    private final RestClient restClient;
 
-    public @Nullable FakeStoreProductDto replaceFakeStoreProduct(FakeStoreProductDto fakeStoreProductDtoInput, Long id) {
-        ResponseEntity<FakeStoreProductDto> response =
-                requestForEntity(HttpMethod.PUT, FAKE_STORE_PRODUCT_BY_ID_URL, fakeStoreProductDtoInput,
-                        FakeStoreProductDto.class, id);
+    public FakeStoreApiClient(RestClient.Builder builder, FakeStoreApiConfig properties) {
+        // used for connection pooling
+        PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
+        connectionManager.setMaxTotal(properties.getHttpClientMaxConnectPool());
+        connectionManager.setDefaultMaxPerRoute(properties.getHttpClientMaxConnectPerRoute());
 
-        FakeStoreProductDto fakeStoreProductDtoOutput = response.getBody();
-        if (!validateResponse(response)) {
-            return null;
-        }
+        CloseableHttpClient httpClient = HttpClients.custom()
+                .setConnectionManager(connectionManager)
+                .evictIdleConnections(TimeValue.ofMilliseconds(Long.parseLong(
+                        properties.getHttpIdleConnectionTimeoutMs())))
+                .evictExpiredConnections()
+                .build();
 
-        return fakeStoreProductDtoOutput;
+        HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory(httpClient);
+        factory.setConnectTimeout(Integer.parseInt(properties.getTimeoutConnectMs()));
+        factory.setReadTimeout(Integer.parseInt(properties.getTimeoutReadMs()));
+
+        this.restClient = builder
+                .baseUrl(properties.getBaseUrl())
+                .requestFactory(factory)
+                .build();
     }
 
-    private boolean validateResponse(ResponseEntity<FakeStoreProductDto> fakeStoreProductResponseDto) {
-        if (fakeStoreProductResponseDto.getBody() == null || fakeStoreProductResponseDto.getStatusCode() != HttpStatus.OK) {
-            return false;
-        }
+    /**
+     * Creates a product.
+     */
+    public FakeStoreProductDto createFakeStoreProduct(FakeStoreProductDto fakeStoreProductDtoInput) {
+        ResponseEntity<FakeStoreProductDto> response = restClient.post()
+                .uri(PRODUCTS_PATH)
+                .body(fakeStoreProductDtoInput)
+                .retrieve()
+                .toEntity(FakeStoreProductDto.class);
 
-        return true;
+        return extractOrThrow(response, "create product");
     }
 
-    private <T> ResponseEntity<T> requestForEntity(HttpMethod httpMethod, String url, @Nullable Object request, Class<T> responseType, Object... uriVariables) throws RestClientException {
-        RestTemplate restTemplate = restTemplateBuilder.build();
-        RequestCallback requestCallback = restTemplate.httpEntityCallback(request, responseType);
-        ResponseExtractor<ResponseEntity<T>> responseExtractor = restTemplate.responseEntityExtractor(responseType);
-        return restTemplate.execute(url, httpMethod, requestCallback, responseExtractor, uriVariables);
+    /**
+     * Updates/Replaces a product.
+     */
+    public FakeStoreProductDto replaceFakeStoreProduct(FakeStoreProductDto fakeStoreProductDtoInput, Long id) {
+        log.debug("Replacing product with id={} via FakeStore API", id);
+        ResponseEntity<FakeStoreProductDto> response = restClient.put()
+                .uri(PRODUCT_BY_ID_PATH, id)
+                .body(fakeStoreProductDtoInput)
+                .retrieve()
+                .toEntity(FakeStoreProductDto.class);
+
+        return extractOrThrow(response, "replace product id=" + id);
+    }
+
+    /**
+     * Retrieves all products.
+     */
+    public FakeStoreProductDto[] getAllProducts() {
+        log.debug("Fetching all products from FakeStore API");
+        ResponseEntity<FakeStoreProductDto[]> response = restClient.get()
+                .uri(PRODUCTS_PATH)
+                .retrieve()
+                .toEntity(FakeStoreProductDto[].class);
+
+        return extractOrThrow(response, "fetch all products");
+    }
+
+    /**
+     * Retrieves a product by id.
+     */
+    public FakeStoreProductDto getProductById(Long id) {
+        log.debug("Fetching product with id={} via FakeStore API", id);
+        ResponseEntity<FakeStoreProductDto> response = restClient.get()
+                .uri(PRODUCT_BY_ID_PATH, id)
+                .retrieve()
+                .toEntity(FakeStoreProductDto.class);
+
+        return extractOrThrow(response, "fetch product id=" + id);
+    }
+
+    /**
+     * Deletes a product by id.
+     */
+    public FakeStoreProductDto deleteProductById(Long id) {
+        log.debug("Deleting product with id={} via FakeStore API", id);
+        ResponseEntity<FakeStoreProductDto> response = restClient.delete()
+                .uri(PRODUCT_BY_ID_PATH, id)
+                .retrieve()
+                .toEntity(FakeStoreProductDto.class);
+
+        return extractOrThrow(response, "delete product id=" + id);
+    }
+
+    private <T> T extractOrThrow(ResponseEntity<T> response, String action) {
+        if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
+            throw new FakeStoreApiException("Failed to " + action + ", status=" + response.getStatusCode());
+        }
+        return response.getBody();
     }
 }
