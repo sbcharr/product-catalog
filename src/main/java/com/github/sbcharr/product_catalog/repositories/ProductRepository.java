@@ -1,4 +1,4 @@
-package com.github.sbcharr.product_catalog.repos;
+package com.github.sbcharr.product_catalog.repositories;
 
 import com.github.sbcharr.product_catalog.models.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ProductRepo extends JpaRepository<Product, Long> {
+public interface ProductRepository extends JpaRepository<Product, Long> {
     Product save(Product product);
     Optional<Product> findById(Long id);
     List<Product> findAll();

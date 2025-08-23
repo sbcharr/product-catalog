@@ -1,7 +1,7 @@
 package com.github.sbcharr.product_catalog.services;
 
 import com.github.sbcharr.product_catalog.models.Product;
-import com.github.sbcharr.product_catalog.repos.ProductRepo;
+import com.github.sbcharr.product_catalog.repositories.ProductRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
@@ -15,22 +15,22 @@ import java.util.Optional;
 @Slf4j
 public class ProductService implements IProductService {
     @Autowired
-    private ProductRepo productRepo;
+    private ProductRepository productRepository;
 
     @Override
     public Product createProduct(Product product) {
-        return productRepo.save(product);
+        return productRepository.save(product);
     }
 
     @Override
     public Product updateProduct(Product product, Long id) {
         product.setId(id);
-        return productRepo.save(product);
+        return productRepository.save(product);
     }
 
     @Override
     public Product getProductById(Long productId) {
-        Optional<Product> product = productRepo.findById(productId);
+        Optional<Product> product = productRepository.findById(productId);
         if (product.isEmpty()) {
             log.warn("Product with ID {} not found", productId);
             return null;
@@ -41,11 +41,11 @@ public class ProductService implements IProductService {
 
     @Override
     public List<Product> getAllProducts() {
-        return productRepo.findAll();
+        return productRepository.findAll();
     }
 
     @Override
     public void deleteProductById(Long id) {
-        productRepo.deleteById(id);
+        productRepository.deleteById(id);
     }
 }
