@@ -15,9 +15,9 @@ public abstract class AbstractContainerIntegrationTest {
     @Container
     public static final MySQLContainer<?> MYSQL =
             new MySQLContainer<>("mysql:8.0")
-                    .withDatabaseName("product_catalog")
-                    .withUsername("dev")
-                    .withPassword("dev")
+                    .withDatabaseName("testdb")
+                    .withUsername("test")
+                    .withPassword("test")
                     .withReuse(true);
 
     @DynamicPropertySource
