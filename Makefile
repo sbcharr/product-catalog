@@ -25,7 +25,7 @@ test:
 # Run integration tests
 it:
 	@echo "Running integration tests..."
-	$(MVN) verify -DskipTests=true -Dspring.profiles.active=integration
+	$(MVN) verify -Dspring.profiles.active=integration
 
 # Package jar
 package:
