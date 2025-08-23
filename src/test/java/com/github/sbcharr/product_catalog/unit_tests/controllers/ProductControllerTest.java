@@ -1,5 +1,6 @@
-package com.github.sbcharr.product_catalog.controllers;
+package com.github.sbcharr.product_catalog.unit_tests.controllers;
 
+import com.github.sbcharr.product_catalog.controllers.ProductController;
 import com.github.sbcharr.product_catalog.dtos.request.ProductRequestDto;
 import com.github.sbcharr.product_catalog.dtos.response.ProductResponseDto;
 import com.github.sbcharr.product_catalog.models.Category;
@@ -58,7 +59,7 @@ public class ProductControllerTest {
     }
 
     @Test
-    public void testCreateProduct_success() {
+    void testCreateProduct_success() {
         when(productService.createProduct(any(Product.class))).thenReturn(sampleProduct);
         ResponseEntity<ProductResponseDto> response = productController.createProduct(sampleProductRequestDto);
         assertNotNull(response.getBody());
@@ -74,7 +75,7 @@ public class ProductControllerTest {
     }
 
     @Test
-    void createProduct_failure_returns500() {
+    void testCreateProduct_failure_returns500() {
         when(productService.createProduct(any(Product.class))).thenReturn(null);
 
         ResponseStatusException ex = assertThrows(ResponseStatusException.class,
@@ -84,7 +85,7 @@ public class ProductControllerTest {
     }
 
     @Test
-    void updateProduct_success() {
+    void testUpdateProduct_success() {
         when(productService.updateProduct(any(Product.class), eq(1L))).thenReturn(sampleProduct);
 
         ResponseEntity<ProductResponseDto> response = productController.updateProduct(sampleProductRequestDto,
@@ -98,7 +99,7 @@ public class ProductControllerTest {
     }
 
     @Test
-    void updateProduct_NullId_throws400() {
+    void testUpdateProduct_NullId_throws400() {
         ResponseStatusException ex = assertThrows(ResponseStatusException.class,
                 () -> productController.updateProduct(sampleProductRequestDto, null));
 
@@ -107,7 +108,7 @@ public class ProductControllerTest {
     }
 
     @Test
-    void updateProduct_invalidId_throws400() {
+    void testUpdateProduct_invalidId_throws400() {
         ResponseStatusException ex = assertThrows(ResponseStatusException.class,
                 () -> productController.updateProduct(sampleProductRequestDto, 0L));
 
@@ -116,7 +117,7 @@ public class ProductControllerTest {
     }
 
     @Test
-    void updateProduct_failure_returns404() {
+    void testUpdateProduct_failure_returns404() {
         when(productService.updateProduct(any(Product.class), eq(1L))).thenReturn(null);
 
         ResponseStatusException ex = assertThrows(ResponseStatusException.class,
@@ -126,7 +127,7 @@ public class ProductControllerTest {
     }
 
     @Test
-    void getAllProducts_success() {
+    void testGetAllProducts_success() {
         when(productService.getAllProducts()).thenReturn(Arrays.asList(sampleProduct));
 
         List<ProductResponseDto> response = productController.getAllProducts();
@@ -137,7 +138,7 @@ public class ProductControllerTest {
     }
 
     @Test
-    void getAllProducts_emptyList() {
+    void testGetAllProducts_emptyList() {
         when(productService.getAllProducts()).thenReturn(Collections.emptyList());
 
         List<ProductResponseDto> response = productController.getAllProducts();
@@ -146,7 +147,7 @@ public class ProductControllerTest {
     }
 
     @Test
-    void getProductById_success() {
+    void testGetProductById_success() {
         when(productService.getProductById(1L)).thenReturn(sampleProduct);
 
         ProductResponseDto response = productController.getProductById(1L);
@@ -157,7 +158,7 @@ public class ProductControllerTest {
     }
 
     @Test
-    void getProductById_notFound_throws404() {
+    void testGetProductById_notFound_throws404() {
         when(productService.getProductById(1L)).thenReturn(null);
 
         ResponseStatusException ex = assertThrows(ResponseStatusException.class,
@@ -167,7 +168,7 @@ public class ProductControllerTest {
     }
 
     @Test
-    void deleteProductById_success() {
+    void testDeleteProductById_success() {
         doNothing().when(productService).deleteProductById(1L);
 
         ResponseEntity<Void> response = productController.deleteProductById(1L);
