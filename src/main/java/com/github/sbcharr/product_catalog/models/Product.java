@@ -1,9 +1,7 @@
 package com.github.sbcharr.product_catalog.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,8 +13,11 @@ public class Product extends BaseEntity {
     private String description;
     private double price;
     private String imageUrl;
-    @ManyToOne(cascade = CascadeType.ALL)
+
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "category_id") // FK column
     private Category category;
+
     @JsonIgnore
     private Boolean isSaleSpecific; // related to business
 }

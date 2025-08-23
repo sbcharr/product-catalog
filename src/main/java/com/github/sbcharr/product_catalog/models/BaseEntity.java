@@ -1,6 +1,8 @@
 package com.github.sbcharr.product_catalog.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
@@ -13,9 +15,12 @@ import java.time.Instant;
 @MappedSuperclass
 public abstract class BaseEntity {
     @Id
-    private long id;
-    private Instant createdAt;
-    private Instant updatedAt;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private Instant createdAt = Instant.now();
+    private Instant updatedAt = Instant.now();
+
     @JsonIgnore
     private Status status; // to keep track of the deletion status (soft delete)
 }

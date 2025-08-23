@@ -1,17 +1,9 @@
 package com.github.sbcharr.product_catalog.clients;
 
-import com.github.sbcharr.product_catalog.configs.FakeStoreApiConfig;
 import com.github.sbcharr.product_catalog.dtos.request.FakeStoreProductDto;
 import com.github.sbcharr.product_catalog.exceptions.FakeStoreApiException;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
-import org.apache.hc.core5.util.TimeValue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
@@ -23,27 +15,8 @@ public class FakeStoreApiClient {
 
     private final RestClient restClient;
 
-    public FakeStoreApiClient(RestClient.Builder builder, FakeStoreApiConfig properties) {
-        // used for connection pooling
-        PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
-        connectionManager.setMaxTotal(properties.getHttpClientMaxConnectPool());
-        connectionManager.setDefaultMaxPerRoute(properties.getHttpClientMaxConnectPerRoute());
-
-        CloseableHttpClient httpClient = HttpClients.custom()
-                .setConnectionManager(connectionManager)
-                .evictIdleConnections(TimeValue.ofMilliseconds(Long.parseLong(
-                        properties.getHttpIdleConnectionTimeoutMs())))
-                .evictExpiredConnections()
-                .build();
-
-        HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory(httpClient);
-        factory.setConnectTimeout(Integer.parseInt(properties.getTimeoutConnectMs()));
-        factory.setReadTimeout(Integer.parseInt(properties.getTimeoutReadMs()));
-
-        this.restClient = builder
-                .baseUrl(properties.getBaseUrl())
-                .requestFactory(factory)
-                .build();
+    public FakeStoreApiClient(RestClient restClient) {
+        this.restClient = restClient;
     }
 
     /**
