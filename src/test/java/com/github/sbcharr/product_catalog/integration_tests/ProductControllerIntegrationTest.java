@@ -1,6 +1,7 @@
 package com.github.sbcharr.product_catalog.integration_tests;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.sbcharr.product_catalog.AbstractContainerIntegrationTest;
 import com.github.sbcharr.product_catalog.models.Category;
 import com.github.sbcharr.product_catalog.models.Product;
 import com.github.sbcharr.product_catalog.repositories.ProductRepository;
@@ -19,7 +20,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
-public class ProductControllerIntegrationTest {
+public class ProductControllerIntegrationTest extends AbstractContainerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -36,7 +37,6 @@ public class ProductControllerIntegrationTest {
     @BeforeEach
     void setup() {
         productRepository.deleteAll();
-
         // Setup category
         electronicsCategory = new Category();
         electronicsCategory.setName("Electronics");
