@@ -1,4 +1,4 @@
-name: Build - Product Catalog Service
+name: Build
 
 on:
   push:

@@ -5,9 +5,12 @@ on:
     workflows: ["Build"]   # Runs only after Build.yml completes
     types:
       - completed
+    branches:
+      - main
 
 jobs:
   test:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
 
     services:
