@@ -1,9 +1,7 @@
 package com.github.sbcharr.product_catalog.services;
 
 import com.github.sbcharr.product_catalog.clients.FakeStoreApiClient;
-import com.github.sbcharr.product_catalog.dtos.request.FakeStoreProductDto;
-import com.github.sbcharr.product_catalog.dtos.request.ProductRequestDto;
-import com.github.sbcharr.product_catalog.dtos.response.ProductResponseDto;
+import com.github.sbcharr.product_catalog.dtos.FakeStoreProductDto;
 import com.github.sbcharr.product_catalog.models.Category;
 import com.github.sbcharr.product_catalog.models.Product;
 import lombok.RequiredArgsConstructor;

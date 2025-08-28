@@ -1,10 +1,13 @@
 package com.github.sbcharr.product_catalog.controllers;
 
-import com.github.sbcharr.product_catalog.dtos.request.ProductRequestDto;
-import com.github.sbcharr.product_catalog.dtos.response.ProductResponseDto;
+import com.github.sbcharr.product_catalog.dtos.ProductRequestDto;
+import com.github.sbcharr.product_catalog.dtos.ProductResponseDto;
+import com.github.sbcharr.product_catalog.dtos.search.SearchRequestDto;
 import com.github.sbcharr.product_catalog.models.Product;
 import com.github.sbcharr.product_catalog.services.IProductService;
+import com.github.sbcharr.product_catalog.services.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,24 +17,28 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
+@RequestMapping("/api/v1/products")
 public class ProductController {
-    @Autowired
-    //@Qualifier("fakeStoreProductService")
     IProductService productService;
 
-    @PostMapping("/products")
+    @Autowired
+    public ProductController(ProductService productService) {
+        this.productService = productService;
+    }
+
+    @PostMapping
     public ResponseEntity<ProductResponseDto> createProduct(@RequestBody ProductRequestDto requestDto) {
         Product product = ProductController.toEntity(requestDto);
         product = productService.createProduct(product);
         if (product == null) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to create product");
         }
-        ProductResponseDto productResponseDto = ProductController.toDto(product);
+        ProductResponseDto productResponseDto = ProductResponseDto.fromEntity(product);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(productResponseDto);
     }
 
-    @PutMapping("/products/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<ProductResponseDto> updateProduct(@RequestBody ProductRequestDto requestDto, @PathVariable("id") Long productId) {
         if (productId == null || productId <= 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid Product ID");
@@ -41,31 +48,31 @@ public class ProductController {
         if (product == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid Data or Product Not Found");
         }
-        ProductResponseDto productResponseDto = ProductController.toDto(product);
+        ProductResponseDto productResponseDto = ProductResponseDto.fromEntity(product);
 
         return ResponseEntity.ok(productResponseDto);
     }
 
-    @GetMapping("/products")
+    @GetMapping
     public List<ProductResponseDto> getAllProducts() {
         List<Product> productList = productService.getAllProducts();
 
         return productList.stream()
-                .map(ProductController::toDto)
+                .map(ProductResponseDto::fromEntity)
                 .collect(Collectors.toList());
     }
 
-    @GetMapping("/products/{id}")
+    @GetMapping("/{id}")
     public ProductResponseDto getProductById(@PathVariable("id") Long id) {
         Product product = productService.getProductById(id);
         if (product == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product Not Found");
         }
 
-        return ProductController.toDto(product);
+        return ProductResponseDto.fromEntity(product);
     }
 
-    @DeleteMapping("/products/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProductById(@PathVariable("id") Long id) {
         productService.deleteProductById(id);
 
@@ -83,15 +90,27 @@ public class ProductController {
         return product;
     }
 
-    public static ProductResponseDto toDto(Product entity) {
-        ProductResponseDto dto = new ProductResponseDto();
-        dto.setId(entity.getId());
-        dto.setName(entity.getName());
-        dto.setDescription(entity.getDescription());
-        dto.setPrice(entity.getPrice());
-        dto.setImageurl(entity.getImageUrl());
-        dto.setCategory(entity.getCategory());
+//    public static ProductResponseDto toDto(Product entity) {
+//        ProductResponseDto dto = new ProductResponseDto();
+//        dto.setId(entity.getId());
+//        dto.setName(entity.getName());
+//        dto.setDescription(entity.getDescription());
+//        dto.setPrice(entity.getPrice());
+//        dto.setImageurl(entity.getImageUrl());
+//        dto.setCategory(entity.getCategory());
+//
+//        return dto;
+//    }
 
-        return dto;
+    @PostMapping("/search")
+    public Page<ProductResponseDto> searchProducts(@RequestBody SearchRequestDto searchRequestDto) {
+        Page<Product> productPages = productService.searchProduct(
+                searchRequestDto.getQuery(),
+                searchRequestDto.getPageSize(),
+                searchRequestDto.getPage(),
+                searchRequestDto.getSortParams()
+        );
+
+        return productPages.map(ProductResponseDto::fromEntity);
     }
 }

@@ -1,6 +1,6 @@
 package com.github.sbcharr.product_catalog.clients;
 
-import com.github.sbcharr.product_catalog.dtos.request.FakeStoreProductDto;
+import com.github.sbcharr.product_catalog.dtos.FakeStoreProductDto;
 import com.github.sbcharr.product_catalog.exceptions.FakeStoreApiException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;

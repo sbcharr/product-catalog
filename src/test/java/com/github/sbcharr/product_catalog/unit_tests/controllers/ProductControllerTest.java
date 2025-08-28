@@ -1,8 +1,8 @@
 package com.github.sbcharr.product_catalog.unit_tests.controllers;
 
 import com.github.sbcharr.product_catalog.controllers.ProductController;
-import com.github.sbcharr.product_catalog.dtos.request.ProductRequestDto;
-import com.github.sbcharr.product_catalog.dtos.response.ProductResponseDto;
+import com.github.sbcharr.product_catalog.dtos.ProductRequestDto;
+import com.github.sbcharr.product_catalog.dtos.ProductResponseDto;
 import com.github.sbcharr.product_catalog.models.Category;
 import com.github.sbcharr.product_catalog.models.Product;
 import com.github.sbcharr.product_catalog.services.IProductService;

@@ -1,10 +1,14 @@
 package com.github.sbcharr.product_catalog.services;
 
+import com.github.sbcharr.product_catalog.dtos.search.SortParams;
 import com.github.sbcharr.product_catalog.models.Product;
 import com.github.sbcharr.product_catalog.repositories.ProductRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,8 +18,12 @@ import java.util.Optional;
 @Primary
 @Slf4j
 public class ProductService implements IProductService {
-    @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    public ProductService(ProductRepository productRepository) {
+        this.productRepository = productRepository;
+    }
 
     @Override
     public Product createProduct(Product product) {
@@ -47,5 +55,24 @@ public class ProductService implements IProductService {
     @Override
     public void deleteProductById(Long id) {
         productRepository.deleteById(id);
+    }
+
+    @Override
+    public Page<Product> searchProduct(String query, Integer pageSize, Integer pageNumber, List<SortParams> sortParams)
+    {
+        Sort sort = null;
+
+        if (sortParams != null && !sortParams.isEmpty()) {
+            for (SortParams param : sortParams) {
+                Sort newSort = Sort.by(param.getDirection(), param.getField());
+                if (sort == null) {
+                    sort = newSort;
+                } else {
+                    sort = sort.and(newSort);
+                }
+            }
+        }
+
+        return productRepository.findByName(query, PageRequest.of(pageNumber, pageSize, sort));
     }
 }

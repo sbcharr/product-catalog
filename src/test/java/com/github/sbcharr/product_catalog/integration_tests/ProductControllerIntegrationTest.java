@@ -2,7 +2,7 @@ package com.github.sbcharr.product_catalog.integration_tests;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.sbcharr.product_catalog.AbstractContainerIntegrationTest;
-import com.github.sbcharr.product_catalog.dtos.request.ProductRequestDto;
+import com.github.sbcharr.product_catalog.dtos.ProductRequestDto;
 import com.github.sbcharr.product_catalog.models.Category;
 import com.github.sbcharr.product_catalog.models.Product;
 import com.github.sbcharr.product_catalog.repositories.ProductRepository;
