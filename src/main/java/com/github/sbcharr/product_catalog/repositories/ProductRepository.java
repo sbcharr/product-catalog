@@ -13,6 +13,7 @@ import java.util.List;
 public interface ProductRepository extends JpaRepository<Product, Long> {
     Page<Product> findByName(String query, Pageable pageable);
 
+    //@Query(`Select * from products p where p.name like %:query% or p.description like %:query%`)
     List<Product> findByPriceBetween(Double priceLow, Double priceHigh);
 
     //List<Product> findAllOrderByPrice();

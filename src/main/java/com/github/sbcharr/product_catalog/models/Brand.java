@@ -12,11 +12,11 @@ import java.util.List;
 
 @Setter
 @Getter
-@Entity(name = "categories")
-public class Category extends BaseEntity {
+@Entity(name = "brands")
+public class Brand extends BaseEntity {
     private String name;
     private String description;
 
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "brand", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Product> products = new ArrayList<>();
 }
