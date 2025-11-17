@@ -11,7 +11,6 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 
 @Configuration
-@Slf4j
 public class RestClientConfig {
 
     @Bean

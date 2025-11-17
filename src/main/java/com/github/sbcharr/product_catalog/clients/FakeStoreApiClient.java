@@ -15,7 +15,8 @@ public class FakeStoreApiClient {
 
     private final RestClient restClient;
 
-    public FakeStoreApiClient(RestClient restClient) {
+    public FakeStoreApiClient(RestClient restClient)
+    {
         this.restClient = restClient;
     }
 

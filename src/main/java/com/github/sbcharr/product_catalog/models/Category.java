@@ -1,9 +1,7 @@
 package com.github.sbcharr.product_catalog.models;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.OneToMany;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,11 +10,16 @@ import java.util.List;
 
 @Setter
 @Getter
-@Entity(name = "categories")
+@Entity
+@Table(name = "categories")
 public class Category extends BaseEntity {
+    @Column(name = "name", nullable = false, length = 200)
     private String name;
+
+    @Column(name = "description", length = 2000)
     private String description;
 
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JsonIgnore
+    @OneToMany(mappedBy = "category", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Product> products = new ArrayList<>();
 }

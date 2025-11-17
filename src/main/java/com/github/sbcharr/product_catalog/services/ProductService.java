@@ -1,5 +1,6 @@
 package com.github.sbcharr.product_catalog.services;
 
+import com.github.sbcharr.product_catalog.clients.FakeStoreApiClient;
 import com.github.sbcharr.product_catalog.dtos.search.SortParams;
 import com.github.sbcharr.product_catalog.models.Product;
 import com.github.sbcharr.product_catalog.repositories.ProductRepository;
@@ -9,6 +10,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,11 +20,12 @@ import java.util.Optional;
 @Primary
 @Slf4j
 public class ProductService implements IProductService {
-    private ProductRepository productRepository;
+    private final ProductRepository productRepository;
+    private final RedisTemplate<String, Object> redisTemplate;
 
-    @Autowired
-    public ProductService(ProductRepository productRepository) {
+    public ProductService(ProductRepository productRepository, RedisTemplate<String, Object> redisTemplate) {
         this.productRepository = productRepository;
+        this.redisTemplate = redisTemplate;
     }
 
     @Override
@@ -38,13 +41,23 @@ public class ProductService implements IProductService {
 
     @Override
     public Product getProductById(Long productId) {
-        Optional<Product> product = productRepository.findById(productId);
-        if (product.isEmpty()) {
+        Product product = (Product) redisTemplate.opsForHash().get("PRODUCTS", "PRODUCT_" + productId);
+        if (product == null) {
+            // cache HIT
+            return product;
+        }
+        // cache MISS
+        log.info("cache miss for product id={}", productId);
+        Optional<Product> optionalProduct = productRepository.findById(productId);
+        if (optionalProduct.isEmpty()) {
             log.warn("Product with ID {} not found", productId);
             return null;
+        } else {
+            // Store in cache
+            redisTemplate.opsForHash().put("PRODUCTS", "PRODUCT_" + productId, product.get());
         }
 
-        return product.get();
+        return optionalProduct.get();
     }
 
     @Override
@@ -73,6 +86,6 @@ public class ProductService implements IProductService {
             }
         }
 
-        return productRepository.findByName(query, PageRequest.of(pageNumber, pageSize, sort));
+        return productRepository.findByNameContainingIgnoreCase(query, PageRequest.of(pageNumber, pageSize, sort));
     }
 }

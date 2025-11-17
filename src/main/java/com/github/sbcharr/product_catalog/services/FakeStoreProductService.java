@@ -4,8 +4,9 @@ import com.github.sbcharr.product_catalog.clients.FakeStoreApiClient;
 import com.github.sbcharr.product_catalog.dtos.FakeStoreProductDto;
 import com.github.sbcharr.product_catalog.models.Category;
 import com.github.sbcharr.product_catalog.models.Product;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Primary;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -13,10 +14,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service("fakeStoreProductService")
-@RequiredArgsConstructor
 @Slf4j
 public class FakeStoreProductService implements IProductService {
     private final FakeStoreApiClient apiClient;
+    private final RedisTemplate<String, Object> redisTemplate;
+
+    public FakeStoreProductService(FakeStoreApiClient apiClient, RedisTemplate<String, Object> redisTemplate) {
+        this.apiClient = apiClient;
+        this.redisTemplate = redisTemplate;
+    }
 
     @Override
     public Product createProduct(Product product) {
@@ -48,8 +54,21 @@ public class FakeStoreProductService implements IProductService {
 
     @Override
     public Product getProductById(Long productId) {
+        Product product = (Product) redisTemplate.opsForHash().get("PRODUCTS", "PRODUCT_" + productId);
+        if (product == null) {
+            // cache HIT
+            return product;
+        }
+        // cache MISS
+        log.info("cache miss for product id={}", productId);
         FakeStoreProductDto fakeStoreProductDto = apiClient.getProductById(productId);
-        return toEntityFromFakeStoreDto(fakeStoreProductDto);
+        if (fakeStoreProductDto != null) {
+            product = toEntityFromFakeStoreDto(fakeStoreProductDto);
+            // save in cache
+            redisTemplate.opsForHash().put("PRODUCTS", "PRODUCT_" + productId, product);
+        }
+
+        return product;
     }
 
     @Override

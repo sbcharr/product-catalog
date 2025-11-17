@@ -4,8 +4,10 @@ import com.github.sbcharr.product_catalog.dtos.ProductRequestDto;
 import com.github.sbcharr.product_catalog.dtos.ProductResponseDto;
 import com.github.sbcharr.product_catalog.dtos.search.SearchRequestDto;
 import com.github.sbcharr.product_catalog.models.Product;
+import com.github.sbcharr.product_catalog.services.FakeStoreProductService;
 import com.github.sbcharr.product_catalog.services.IProductService;
 import com.github.sbcharr.product_catalog.services.ProductService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -18,16 +20,17 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/products")
+@Slf4j
 public class ProductController {
-    IProductService productService;
+    private IProductService productService;
 
-    @Autowired
-    public ProductController(ProductService productService) {
+    public ProductController(FakeStoreProductService productService) {
         this.productService = productService;
     }
 
     @PostMapping
     public ResponseEntity<ProductResponseDto> createProduct(@RequestBody ProductRequestDto requestDto) {
+        log.info("createProduct - start");
         Product product = ProductController.toEntity(requestDto);
         product = productService.createProduct(product);
         if (product == null) {

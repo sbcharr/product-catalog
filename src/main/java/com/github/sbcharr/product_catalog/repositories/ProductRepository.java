@@ -11,13 +11,10 @@ import java.util.List;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
-    Page<Product> findByName(String query, Pageable pageable);
+    Page<Product> findByNameContainingIgnoreCase(String query, Pageable pageable);
 
-    //@Query(`Select * from products p where p.name like %:query% or p.description like %:query%`)
     List<Product> findByPriceBetween(Double priceLow, Double priceHigh);
 
-    //List<Product> findAllOrderByPrice();
-
-    @Query("SELECT p.name FROM  products p where p.id = :id")
+    @Query("SELECT p.name FROM Product p WHERE p.id = :id")
     String findNameById(Long id);
 }
